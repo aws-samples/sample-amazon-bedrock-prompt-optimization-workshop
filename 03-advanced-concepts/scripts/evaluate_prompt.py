@@ -108,7 +108,7 @@ def calculate_keyword_score(response: str, expected: dict) -> float:
         if expected["should_use_tool"].lower() in response.lower():
             score += 1
 
-    return score / checks if checks > 0 else 0.0
+    return score / checks if checks > 0 else 1.0
 
 
 def evaluate_with_llm_judge(

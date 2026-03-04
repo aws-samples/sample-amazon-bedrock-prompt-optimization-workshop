@@ -43,14 +43,19 @@ def check_quality_gate(results_path: str | Path) -> bool:
     with open(results_path, encoding="utf-8") as fh:
         results = json.load(fh)
 
-    score_threshold = float(
-        results.get("score_threshold", 0)
-        or float(__import__("os").environ.get("EVAL_SCORE_THRESHOLD", "0.7"))
-    )
-    pass_rate_threshold = float(
-        results.get("pass_rate_threshold", 0)
-        or float(__import__("os").environ.get("EVAL_PASS_RATE_THRESHOLD", "0.8"))
-    )
+    import os
+
+    score_threshold_raw = results.get("score_threshold")
+    if score_threshold_raw is not None:
+        score_threshold = float(score_threshold_raw)
+    else:
+        score_threshold = float(os.environ.get("EVAL_SCORE_THRESHOLD", "0.7"))
+
+    pass_rate_raw = results.get("pass_rate_threshold")
+    if pass_rate_raw is not None:
+        pass_rate_threshold = float(pass_rate_raw)
+    else:
+        pass_rate_threshold = float(os.environ.get("EVAL_PASS_RATE_THRESHOLD", "0.8"))
 
     avg_score = results.get("avg_score", 0.0)
     pass_rate = results.get("pass_rate", 0.0)
