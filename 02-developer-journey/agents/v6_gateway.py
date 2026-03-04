@@ -108,6 +108,7 @@ def invoke(payload, context=None):
             url=GATEWAY_URL,
             http_client=httpx.AsyncClient(
                 headers={"Authorization": f"Bearer {bearer_token}"},
+                timeout=30.0,
             ),
         )
     )
