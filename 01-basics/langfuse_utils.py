@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from urllib.parse import urlparse
 
 import boto3
@@ -43,8 +45,8 @@ bedrock_runtime = boto3.client(
 
 
 def convert_to_bedrock_messages(
-    messages: List[Dict[str, Any]],
-) -> Tuple[List[Dict[str, str]], List[Dict[str, Any]]]:
+    messages: list[dict[str, Any]],
+) -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     """Convert messages to Bedrock Converse API format."""
     bedrock_messages = []
     system_prompts = []
@@ -89,12 +91,14 @@ def convert_to_bedrock_messages(
 
 @observe(as_type="generation", name="Bedrock Converse")
 def converse(
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     model_id: str = "us.amazon.nova-pro-v1:0",
-    prompt: Optional[PromptClient] = None,
-    metadata: Dict[str, Any] = {},
+    prompt: PromptClient | None = None,
+    metadata: dict[str, Any] | None = None,
     **kwargs,
-) -> Optional[str]:
+) -> str | None:
+    if metadata is None:
+        metadata = {}
     kwargs_clone = kwargs.copy()
     model_parameters = {
         **kwargs_clone.pop("inferenceConfig", {}),
@@ -119,9 +123,7 @@ def converse(
         )
     except (ClientError, Exception) as e:
         error_message = f"ERROR: Can't invoke '{model_id}'. Reason: {e}"
-        langfuse_context.update_current_generation(
-            level="ERROR", status_message=error_message
-        )
+        langfuse_context.update_current_generation(level="ERROR", status_message=error_message)
         print(error_message)
         return
 
@@ -144,14 +146,16 @@ def converse(
 
 @observe(as_type="generation", name="Bedrock Converse Tool Use")
 def converse_tool_use(
-    messages: List[Dict[str, str]],
-    tools: List[Dict[str, str]],
+    messages: list[dict[str, str]],
+    tools: list[dict[str, str]],
     tool_choice: str = "auto",
     model_id: str = "us.amazon.nova-pro-v1:0",
-    prompt: Optional[PromptClient] = None,
-    metadata: Dict[str, Any] = {},
+    prompt: PromptClient | None = None,
+    metadata: dict[str, Any] | None = None,
     **kwargs,
-) -> Optional[List[Dict]]:
+) -> list[dict] | None:
+    if metadata is None:
+        metadata = {}
     kwargs_clone = kwargs.copy()
     model_parameters = {
         **kwargs_clone.pop("inferenceConfig", {}),
@@ -186,9 +190,7 @@ def converse_tool_use(
         tool_config["toolChoice"] = {
             "any": {} if tool_choice == "any" else None,
             "auto": {} if tool_choice == "auto" else None,
-            "tool": (
-                {"name": tool_choice} if tool_choice not in ["any", "auto"] else None
-            ),
+            "tool": ({"name": tool_choice} if tool_choice not in ["any", "auto"] else None),
         }
 
     try:
@@ -201,9 +203,7 @@ def converse_tool_use(
         )
     except (ClientError, Exception) as e:
         error_message = f"ERROR: Can't invoke '{model_id}'. Reason: {e}"
-        langfuse_context.update_current_generation(
-            level="ERROR", status_message=error_message
-        )
+        langfuse_context.update_current_generation(level="ERROR", status_message=error_message)
         print(error_message)
         return
 
