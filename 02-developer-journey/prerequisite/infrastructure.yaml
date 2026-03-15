@@ -163,6 +163,7 @@ Resources:
                   - lambda:InvokeFunction
                 Resource:
                   - !GetAtt CustomerSupportLambda.Arn
+                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:workshop-gateway-*
 
   # DynamoDB Table for Warranty Information
   WarrantyTable:
