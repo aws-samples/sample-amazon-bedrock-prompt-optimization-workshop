@@ -8,7 +8,7 @@ Build a production customer support agent for **TechMart Electronics** while app
 - Product information and specifications
 - Return policies and procedures
 - Technical troubleshooting via Knowledge Base
-- Warranty status lookup
+- Web search for current information
 
 **Duration**: ~3 hours
 
@@ -32,11 +32,11 @@ Deploy the infrastructure using Make (from `02-developer-journey/`):
 # Check environment configuration
 make check-env
 
-# Deploy all infrastructure (DynamoDB, Lambda, S3, Cognito)
+# Deploy all infrastructure (Lambda, S3, Cognito)
 make deploy-all
 
 # Or deploy individually:
-make deploy-infra    # DynamoDB, Lambda, S3, IAM roles
+make deploy-infra    # Lambda, S3, IAM roles
 make deploy-cognito  # Cognito User Pool for Gateway auth
 ```
 
@@ -214,13 +214,12 @@ Your optimized agent should achieve:
 │   ├── product_catalog.json
 │   └── return_policies.json
 └── prerequisite/             # CloudFormation templates
-    ├── infrastructure.yaml   # DynamoDB, Lambda, S3, KB, IAM
+    ├── infrastructure.yaml   # Lambda, S3, KB, IAM
     ├── cognito.yaml          # Cognito User Pool for Gateway
     └── lambda/               # Lambda function code
         ├── api_spec.json     # Tool schema
         └── python/           # Lambda source code
             ├── lambda_function.py
-            ├── check_warranty.py
             ├── web_search.py
             └── ddgs-layer.zip
 ```
