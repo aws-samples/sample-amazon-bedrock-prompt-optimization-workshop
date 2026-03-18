@@ -13,21 +13,13 @@ from langfuse.model import PromptClient
 langfuse_context = get_client()
 
 MODEL_CONFIG = {
-    "nova_pro": {
-        "model_id": "us.amazon.nova-pro-v1:0",
+    "sonnet": {
+        "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
         "inferenceConfig": {"maxTokens": 4096, "temperature": 0},
     },
-    "nova_lite": {
-        "model_id": "us.amazon.nova-lite-v1:0",
-        "inferenceConfig": {"maxTokens": 2048, "temperature": 0},
-    },
-    "nova_micro": {
-        "model_id": "us.amazon.nova-micro-v1:0",
-        "inferenceConfig": {"maxTokens": 2048, "temperature": 0},
-    },
-    "haiku-4.5": {
+    "haiku": {
         "model_id": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-        "inferenceConfig": {"maxTokens": 4096, "temperature": 0},
+        "inferenceConfig": {"maxTokens": 2048, "temperature": 0},
     },
 }
 
@@ -40,7 +32,7 @@ GUARDRAIL_CONFIG = {
 # used to invoke the Bedrock Converse API
 bedrock_runtime = boto3.client(
     service_name="bedrock-runtime",
-    region_name="us-west-2",
+    region_name="us-east-1",
 )
 
 
@@ -92,7 +84,7 @@ def convert_to_bedrock_messages(
 @observe(as_type="generation", name="Bedrock Converse")
 def converse(
     messages: list[dict[str, Any]],
-    model_id: str = "us.amazon.nova-pro-v1:0",
+    model_id: str = "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
     prompt: PromptClient | None = None,
     metadata: dict[str, Any] | None = None,
     **kwargs,
@@ -149,7 +141,7 @@ def converse_tool_use(
     messages: list[dict[str, str]],
     tools: list[dict[str, str]],
     tool_choice: str = "auto",
-    model_id: str = "us.amazon.nova-pro-v1:0",
+    model_id: str = "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
     prompt: PromptClient | None = None,
     metadata: dict[str, Any] | None = None,
     **kwargs,
