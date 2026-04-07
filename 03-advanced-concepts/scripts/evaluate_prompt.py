@@ -194,25 +194,14 @@ def run_evaluation() -> dict:
     commit_sha = os.environ.get("CODEBUILD_RESOLVED_SOURCE_VERSION", "local")
     build_id = os.environ.get("CODEBUILD_BUILD_ID", "local")
     build_number = os.environ.get("CODEBUILD_BUILD_NUMBER", "local")
-    run_name = f"ci-{build_number}"
+    _ = f"ci-{build_number}"  # run_name unused after removing v2 dataset linking
 
     results: list[dict] = []
 
-    for idx, (input_data, expected, metadata, lf_item) in enumerate(eval_items):
+    for idx, (input_data, expected, metadata, _lf_item) in enumerate(eval_items):
         query = input_data.get("query", "")
         item_id = metadata.get("id", f"item-{idx}")
         print(f"  [{idx + 1}/{len(eval_items)}] {query[:60]}...", end=" ")
-
-        trace = None
-        if langfuse is not None:
-            trace = langfuse.trace(
-                name="ci-eval",
-                metadata={
-                    "commit": commit_sha,
-                    "build_id": build_id,
-                    "item_id": item_id,
-                },
-            )
 
         try:
             # Run agent
@@ -228,38 +217,44 @@ def run_evaluation() -> dict:
             # Combined score (average of keyword and judge)
             combined_score = (keyword_score + judge_score) / 2.0
 
-            # Push scores to Langfuse
-            if langfuse is not None and trace is not None:
-                generation = trace.generation(
-                    name="agent-response",
-                    input=query,
-                    output=agent_response,
-                )
-                generation.end()
+            # Push traces and scores to Langfuse (v4 context manager API)
+            if langfuse is not None:
+                with langfuse.start_as_current_observation(
+                    as_type="span",
+                    name="ci-eval",
+                    metadata={
+                        "commit": commit_sha,
+                        "build_id": build_id,
+                        "item_id": item_id,
+                    },
+                ) as trace:
+                    with langfuse.start_as_current_observation(
+                        as_type="generation",
+                        name="agent-response",
+                        input=query,
+                    ) as generation:
+                        generation.update(output=agent_response)
 
-                langfuse.create_score(
-                    trace_id=trace.id,
-                    name="keyword_accuracy",
-                    value=keyword_score,
-                    comment=f"Keyword match: {keyword_score:.2f}",
-                )
-                langfuse.create_score(
-                    trace_id=trace.id,
-                    name="helpfulness_llm",
-                    value=judge_score,
-                    comment=judge_result.get("reason", ""),
-                )
-                langfuse.create_score(
-                    trace_id=trace.id,
-                    name="combined",
-                    value=combined_score,
-                )
+                    trace_id = trace.trace_id
+                    langfuse.create_score(
+                        trace_id=trace_id,
+                        name="keyword_accuracy",
+                        value=keyword_score,
+                        comment=f"Keyword match: {keyword_score:.2f}",
+                    )
+                    langfuse.create_score(
+                        trace_id=trace_id,
+                        name="helpfulness_llm",
+                        value=judge_score,
+                        comment=judge_result.get("reason", ""),
+                    )
+                    langfuse.create_score(
+                        trace_id=trace_id,
+                        name="combined",
+                        value=combined_score,
+                    )
 
-                # Link to dataset item if available
-                if lf_item is not None:
-                    lf_item.link(trace=trace, run_name=run_name)
-
-                trace.update(output=agent_response)
+                    trace.update(output=agent_response)
 
             results.append({
                 "item_id": item_id,
