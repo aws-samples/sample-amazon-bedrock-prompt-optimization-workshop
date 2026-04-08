@@ -155,50 +155,29 @@ def run_evaluation() -> dict:
     bedrock = boto3.client("bedrock-runtime", region_name=REGION)
     langfuse = _init_langfuse()
 
-    # Determine dataset source: Langfuse dataset or local JSON fallback
-    dataset_items: list[dict] = []
-    langfuse_dataset = None
+    # Fetch dataset from Langfuse (single source of truth)
+    if langfuse is None:
+        print("[ERROR] Langfuse credentials required. Set LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY.")
+        return {
+            "total": 0, "successful": 0, "failed": 0,
+            "avg_score": 0.0, "pass_rate": 0.0,
+        }
 
-    if langfuse is not None:
-        try:
-            langfuse_dataset = langfuse.get_dataset(name=DATASET_NAME)
-            print(f"Loaded dataset '{DATASET_NAME}' from Langfuse "
-                  f"({len(langfuse_dataset.items)} items)")
-        except Exception as exc:
-            print(f"[WARN] Could not fetch Langfuse dataset: {exc}")
+    langfuse_dataset = langfuse.get_dataset(name=DATASET_NAME)
+    print(f"Loaded dataset '{DATASET_NAME}' from Langfuse "
+          f"({len(langfuse_dataset.items)} items)")
 
-    if langfuse_dataset is None or not langfuse_dataset.items:
-        # Fallback: load from local JSON
-        local_path = Path(__file__).resolve().parent.parent / "data" / "customer-support-eval.json"
-        if local_path.exists():
-            with open(local_path, encoding="utf-8") as fh:
-                dataset_items = json.load(fh)
-            print(f"Loaded {len(dataset_items)} items from local file: {local_path}")
-        else:
-            print(f"[ERROR] No dataset found in Langfuse or at {local_path}")
-            return {
-                "total": 0, "successful": 0, "failed": 0,
-                "avg_score": 0.0, "pass_rate": 0.0,
-            }
-
-    # Build a unified list of (input, expected_output, metadata, langfuse_item)
-    eval_items: list[tuple[dict, dict, dict, object | None]] = []
-    if langfuse_dataset and langfuse_dataset.items:
-        for item in langfuse_dataset.items:
-            eval_items.append((item.input, item.expected_output or {}, item.metadata or {}, item))
-    else:
-        for item in dataset_items:
-            eval_items.append((item["input"], item.get("expected_output", {}), item.get("metadata", {}), None))
+    eval_items: list[tuple[dict, dict, dict]] = []
+    for item in langfuse_dataset.items:
+        eval_items.append((item.input, item.expected_output or {}, item.metadata or {}))
 
     # Commit / build metadata for trace tagging
     commit_sha = os.environ.get("CODEBUILD_RESOLVED_SOURCE_VERSION", "local")
     build_id = os.environ.get("CODEBUILD_BUILD_ID", "local")
     build_number = os.environ.get("CODEBUILD_BUILD_NUMBER", "local")
-    _ = f"ci-{build_number}"  # run_name unused after removing v2 dataset linking
-
     results: list[dict] = []
 
-    for idx, (input_data, expected, metadata, _lf_item) in enumerate(eval_items):
+    for idx, (input_data, expected, metadata) in enumerate(eval_items):
         query = input_data.get("query", "")
         item_id = metadata.get("id", f"item-{idx}")
         print(f"  [{idx + 1}/{len(eval_items)}] {query[:60]}...", end=" ")
