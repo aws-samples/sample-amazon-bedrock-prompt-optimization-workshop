@@ -1,10 +1,10 @@
 """
 Evaluation script for CI/CD pipeline integration.
 
-Fetches a dataset from Langfuse, runs each item through an agent
-(simulated via Bedrock Converse API), scores results, and pushes
-scores back to Langfuse. Exits with non-zero status if the quality
-gate fails.
+Fetches a dataset from Langfuse, runs each item through an agent via
+dataset.run_experiment() with keyword + LLM-as-Judge evaluators. Results
+are logged as a Langfuse dataset run and written to a local JSON file
+for the quality gate.
 
 Usage:
     python scripts/evaluate_prompt.py
@@ -16,15 +16,14 @@ Environment variables required:
     AWS_DEFAULT_REGION   - AWS region for Bedrock (default: us-east-1)
 
 Optional CI/CD environment variables (auto-detected):
-    CODEBUILD_RESOLVED_SOURCE_VERSION - Git commit SHA (CodeBuild)
-    CODEBUILD_BUILD_ID                - Build identifier (CodeBuild)
-    CODEBUILD_BUILD_NUMBER            - Build number (CodeBuild)
+    CODEBUILD_BUILD_NUMBER - Build number (used in experiment run name)
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -62,24 +61,21 @@ def _init_langfuse():
 
         public_key = os.environ.get("LANGFUSE_PUBLIC_KEY")
         secret_key = os.environ.get("LANGFUSE_SECRET_KEY")
-        host = os.environ.get(
-            "LANGFUSE_BASE_URL", "https://cloud.langfuse.com"
-        )
+        host = os.environ.get("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
 
         if not public_key or not secret_key:
             print(
-                "[WARN] LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set. "
-                "Scores will not be pushed to Langfuse."
+                "[ERROR] LANGFUSE_PUBLIC_KEY or LANGFUSE_SECRET_KEY not set."
             )
             return None
 
         return Langfuse(public_key=public_key, secret_key=secret_key, host=host)
     except ImportError:
-        print("[WARN] langfuse package not installed. Scores will not be pushed.")
+        print("[ERROR] langfuse package not installed.")
         return None
 
 
-def call_agent(query: str, bedrock_client) -> str:
+def _call_agent(query: str, bedrock_client) -> dict:
     """Call the agent under test via Bedrock Converse API."""
     response = bedrock_client.converse(
         modelId=MODEL_ID,
@@ -87,10 +83,15 @@ def call_agent(query: str, bedrock_client) -> str:
         messages=[{"role": "user", "content": [{"text": query}]}],
         inferenceConfig={"maxTokens": 500, "temperature": 0.0},
     )
-    return response["output"]["message"]["content"][0]["text"]
+    usage = response["usage"]
+    return {
+        "text": response["output"]["message"]["content"][0]["text"],
+        "input_tokens": usage["inputTokens"],
+        "output_tokens": usage["outputTokens"],
+    }
 
 
-def calculate_keyword_score(response: str, expected: dict) -> float:
+def _calculate_keyword_score(response: str, expected: dict) -> float:
     """Calculate accuracy score based on expected output keywords."""
     score = 0.0
     checks = 0
@@ -103,17 +104,13 @@ def calculate_keyword_score(response: str, expected: dict) -> float:
 
     if "should_use_tool" in expected:
         checks += 1
-        # In a real pipeline this would check tool invocation logs;
-        # here we check if the tool name appears in the response text.
         if expected["should_use_tool"].lower() in response.lower():
             score += 1
 
     return score / checks if checks > 0 else 1.0
 
 
-def evaluate_with_llm_judge(
-    query: str, response: str, bedrock_client
-) -> dict[str, float | str]:
+def _evaluate_with_llm_judge(query: str, response: str, bedrock_client) -> dict:
     """Use an LLM judge to score helpfulness on a 0-10 scale."""
     eval_prompt = f"""Rate the helpfulness of this customer support response on a scale of 0 to 10.
 
@@ -133,11 +130,19 @@ Return ONLY a JSON object: {{"score": <number>, "reason": "<one sentence>"}}"""
         judge_response = bedrock_client.converse(
             modelId=JUDGE_MODEL_ID,
             messages=[{"role": "user", "content": [{"text": eval_prompt}]}],
-            inferenceConfig={"maxTokens": 150, "temperature": 0.0},
+            inferenceConfig={"maxTokens": 300, "temperature": 0.0},
         )
         raw = judge_response["output"]["message"]["content"][0]["text"].strip()
-        # Parse JSON from the response
-        parsed = json.loads(raw)
+
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            json_match = re.search(r'\{[^{}]*"score"\s*:\s*\d+[^{}]*\}', raw)
+            if json_match:
+                parsed = json.loads(json_match.group(0))
+            else:
+                return {"score": 0.0, "reason": f"No JSON found in: {raw[:80]}"}
+
         return {
             "score": float(parsed.get("score", 0)) / 10.0,
             "reason": parsed.get("reason", ""),
@@ -151,13 +156,13 @@ Return ONLY a JSON object: {{"score": <number>, "reason": "<one sentence>"}}"""
 # ---------------------------------------------------------------------------
 
 def run_evaluation() -> dict:
-    """Run the full evaluation pipeline."""
+    """Run the full evaluation pipeline using dataset.run_experiment()."""
+    from langfuse import Evaluation
+
     bedrock = boto3.client("bedrock-runtime", region_name=REGION)
     langfuse = _init_langfuse()
 
-    # Fetch dataset from Langfuse (single source of truth)
     if langfuse is None:
-        print("[ERROR] Langfuse credentials required. Set LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY.")
         return {
             "total": 0, "successful": 0, "failed": 0,
             "avg_score": 0.0, "pass_rate": 0.0,
@@ -167,98 +172,84 @@ def run_evaluation() -> dict:
     print(f"Loaded dataset '{DATASET_NAME}' from Langfuse "
           f"({len(langfuse_dataset.items)} items)")
 
-    eval_items: list[tuple[dict, dict, dict]] = []
-    for item in langfuse_dataset.items:
-        eval_items.append((item.input, item.expected_output or {}, item.metadata or {}))
-
-    # Commit / build metadata for trace tagging
-    commit_sha = os.environ.get("CODEBUILD_RESOLVED_SOURCE_VERSION", "local")
-    build_id = os.environ.get("CODEBUILD_BUILD_ID", "local")
-    build_number = os.environ.get("CODEBUILD_BUILD_NUMBER", "local")
+    # Collect local results via closure
     results: list[dict] = []
+    judge_cache: dict[str, dict] = {}
 
-    for idx, (input_data, expected, metadata) in enumerate(eval_items):
-        query = input_data.get("query", "")
-        item_id = metadata.get("id", f"item-{idx}")
-        print(f"  [{idx + 1}/{len(eval_items)}] {query[:60]}...", end=" ")
+    build_number = os.environ.get("CODEBUILD_BUILD_NUMBER", "local")
+    run_name = f"ci-eval-{build_number}"
 
-        try:
-            # Run agent
-            agent_response = call_agent(query, bedrock)
+    def task(*, item, **kwargs):
+        query = item.input.get("query", "")
+        expected = item.expected_output or {}
+        item_id = (item.metadata or {}).get("id", f"item-{len(results)}")
 
-            # Keyword score
-            keyword_score = calculate_keyword_score(agent_response, expected)
+        agent_result = _call_agent(query, bedrock)
+        agent_response = agent_result["text"]
 
-            # LLM judge score
-            judge_result = evaluate_with_llm_judge(query, agent_response, bedrock)
-            judge_score = judge_result["score"]
+        # Report model usage to Langfuse for cost tracking
+        with langfuse.start_as_current_observation(
+            as_type="generation",
+            name="bedrock-converse",
+            model=MODEL_ID,
+            input=query,
+        ) as gen:
+            gen.update(
+                output=agent_response,
+                usage={
+                    "input": agent_result["input_tokens"],
+                    "output": agent_result["output_tokens"],
+                },
+            )
 
-            # Combined score (average of keyword and judge)
-            combined_score = (keyword_score + judge_score) / 2.0
+        # Pre-compute scores for local results
+        keyword_score = _calculate_keyword_score(agent_response, expected)
+        judge_result = _evaluate_with_llm_judge(query, agent_response, bedrock)
+        judge_score = judge_result["score"]
+        combined_score = (keyword_score + judge_score) / 2.0
+        judge_cache[query] = judge_result
 
-            # Push traces and scores to Langfuse (v4 context manager API)
-            if langfuse is not None:
-                with langfuse.start_as_current_observation(
-                    as_type="span",
-                    name="ci-eval",
-                    metadata={
-                        "commit": commit_sha,
-                        "build_id": build_id,
-                        "item_id": item_id,
-                    },
-                ) as trace:
-                    with langfuse.start_as_current_observation(
-                        as_type="generation",
-                        name="agent-response",
-                        input=query,
-                    ) as generation:
-                        generation.update(output=agent_response)
+        results.append({
+            "item_id": item_id,
+            "keyword_score": keyword_score,
+            "judge_score": judge_score,
+            "combined_score": combined_score,
+            "success": True,
+        })
+        print(f"  [{len(results)}/{len(langfuse_dataset.items)}] {query[:60]}... score={combined_score:.2f}")
+        return agent_response
 
-                    trace_id = trace.trace_id
-                    langfuse.create_score(
-                        trace_id=trace_id,
-                        name="keyword_accuracy",
-                        value=keyword_score,
-                        comment=f"Keyword match: {keyword_score:.2f}",
-                    )
-                    langfuse.create_score(
-                        trace_id=trace_id,
-                        name="helpfulness_llm",
-                        value=judge_score,
-                        comment=judge_result.get("reason", ""),
-                    )
-                    langfuse.create_score(
-                        trace_id=trace_id,
-                        name="combined",
-                        value=combined_score,
-                    )
+    def keyword_evaluator(*, output, expected_output, **kwargs):
+        return Evaluation(
+            name="keyword_accuracy",
+            value=_calculate_keyword_score(output, expected_output or {}),
+        )
 
-                    trace.update(output=agent_response)
+    def judge_evaluator(*, input, output, **kwargs):
+        query = input.get("query", "")
+        cached = judge_cache.get(query)
+        if cached:
+            return Evaluation(
+                name="helpfulness_llm",
+                value=cached["score"],
+                comment=cached.get("reason", ""),
+            )
+        result = _evaluate_with_llm_judge(query, output, bedrock)
+        return Evaluation(
+            name="helpfulness_llm",
+            value=result["score"],
+            comment=result.get("reason", ""),
+        )
 
-            results.append({
-                "item_id": item_id,
-                "keyword_score": keyword_score,
-                "judge_score": judge_score,
-                "combined_score": combined_score,
-                "success": True,
-            })
-            print(f"score={combined_score:.2f}")
-
-        except Exception as exc:
-            results.append({
-                "item_id": item_id,
-                "keyword_score": 0.0,
-                "judge_score": 0.0,
-                "combined_score": 0.0,
-                "success": False,
-                "error": str(exc),
-            })
-            print(f"FAILED: {exc}")
-
-    if langfuse is not None:
-        langfuse.flush()
-        # Allow a moment for flush to complete
-        time.sleep(1)
+    # Run experiment — traces are auto-linked to dataset items
+    langfuse_dataset.run_experiment(
+        name=run_name,
+        task=task,
+        evaluators=[keyword_evaluator, judge_evaluator],
+        max_concurrency=1,
+    )
+    langfuse.flush()
+    time.sleep(1)
 
     # Calculate summary
     successful = [r for r in results if r["success"]]
@@ -269,12 +260,26 @@ def run_evaluation() -> dict:
     )
     pass_rate = len(successful) / len(results) if results else 0.0
 
+    # Fetch production baseline score from SSM Parameter Store for regression check
+    prod_avg_score = None
+    ssm_param = "/prompt-pipeline/production-baseline-score"
+    try:
+        ssm = boto3.client("ssm", region_name=REGION)
+        param = ssm.get_parameter(Name=ssm_param)
+        prod_avg_score = float(param["Parameter"]["Value"])
+        print(f"\n  Production baseline avg score: {prod_avg_score:.3f} (from SSM: {ssm_param})")
+    except ssm.exceptions.ParameterNotFound:
+        print(f"\n  [INFO] No production baseline in SSM ({ssm_param}). Skipping regression check.")
+    except Exception as e:
+        print(f"\n  [WARN] Could not fetch production baseline: {e}")
+
     return {
         "total": len(results),
         "successful": len(successful),
         "failed": len(results) - len(successful),
         "avg_score": avg_score,
         "pass_rate": pass_rate,
+        "prod_avg_score": prod_avg_score,
         "details": results,
     }
 
@@ -313,23 +318,31 @@ if __name__ == "__main__":
     print(f"  Pass rate:      {evaluation_results['pass_rate']:.1%}")
     print(f"{'=' * 60}")
 
-    # Quality gate check
-    gate_passed = (
-        evaluation_results["avg_score"] >= SCORE_THRESHOLD
-        and evaluation_results["pass_rate"] >= PASS_RATE_THRESHOLD
-    )
+    # Quality gate check:
+    # 1. Average score must meet threshold
+    # 2. Pass rate must meet threshold
+    # 3. Must not regress from production baseline (if available)
+    avg = evaluation_results["avg_score"]
+    pr = evaluation_results["pass_rate"]
+    prod_avg = evaluation_results.get("prod_avg_score")
 
-    if gate_passed:
-        print(
-            f"\n  QUALITY GATE PASSED: "
-            f"avg_score={evaluation_results['avg_score']:.3f} >= {SCORE_THRESHOLD}, "
-            f"pass_rate={evaluation_results['pass_rate']:.1%} >= {PASS_RATE_THRESHOLD:.1%}"
-        )
+    reasons = []
+    if avg < SCORE_THRESHOLD:
+        reasons.append(f"avg_score={avg:.3f} < threshold {SCORE_THRESHOLD}")
+    if pr < PASS_RATE_THRESHOLD:
+        reasons.append(f"pass_rate={pr:.1%} < threshold {PASS_RATE_THRESHOLD:.1%}")
+    if prod_avg is not None and avg < prod_avg:
+        reasons.append(f"avg_score={avg:.3f} < production baseline {prod_avg:.3f} (regression)")
+
+    if not reasons:
+        msg = f"avg_score={avg:.3f} >= {SCORE_THRESHOLD}"
+        if prod_avg is not None:
+            msg += f", >= production baseline {prod_avg:.3f}"
+        msg += f", pass_rate={pr:.1%} >= {PASS_RATE_THRESHOLD:.1%}"
+        print(f"\n  QUALITY GATE PASSED: {msg}")
         sys.exit(0)
     else:
-        print(
-            f"\n  QUALITY GATE FAILED: "
-            f"avg_score={evaluation_results['avg_score']:.3f} (need >= {SCORE_THRESHOLD}), "
-            f"pass_rate={evaluation_results['pass_rate']:.1%} (need >= {PASS_RATE_THRESHOLD:.1%})"
-        )
+        print(f"\n  QUALITY GATE FAILED:")
+        for reason in reasons:
+            print(f"    - {reason}")
         sys.exit(1)
