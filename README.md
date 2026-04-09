@@ -31,7 +31,7 @@ Build a solid understanding of tokens, pricing, and optimization strategies.
 |-------|----------|-------------|
 | [Prompts 101](./01-basics/01-prompts-101.ipynb) | 30 min | Tokens, pricing, TPM/RPM, terminology |
 | [Optimization Strategy](./01-basics/02-optimization-strategy.ipynb) | 45 min | Model selection, prompt design, parameter tuning, basic caching |
-| [Langfuse Observability](./01-basics/03-langfuse-observability.ipynb) | TBD | Observability with LangFuse (Pending) |
+| [Langfuse Observability](./01-basics/03-langfuse-observability.ipynb) | 30 min | LLM tracing, cost tracking, prompt management with Langfuse |
 
 ### Part 2: Developer Journey
 *Estimated time: 3 hours*
