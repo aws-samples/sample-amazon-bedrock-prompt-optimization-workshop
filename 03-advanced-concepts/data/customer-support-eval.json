@@ -1,0 +1,186 @@
+[
+  {
+    "id": "return-policy-laptop",
+    "input": {
+      "query": "What is your return policy for laptops?"
+    },
+    "expected_output": {
+      "should_contain": ["30 days", "original packaging"],
+      "tone": "helpful"
+    },
+    "metadata": {
+      "category": "return-policy",
+      "complexity": "simple",
+      "expected_tool": null
+    }
+  },
+  {
+    "id": "return-policy-opened",
+    "input": {
+      "query": "Can I return a laptop I already opened and used for a week?"
+    },
+    "expected_output": {
+      "should_contain": ["30 days", "original packaging", "restocking"],
+      "tone": "helpful"
+    },
+    "metadata": {
+      "category": "return-policy",
+      "complexity": "medium",
+      "expected_tool": null
+    }
+  },
+  {
+    "id": "tech-support-laptop",
+    "input": {
+      "query": "My laptop won't turn on, can you help me troubleshoot?"
+    },
+    "expected_output": {
+      "should_contain": ["power", "charge"],
+      "should_use_tool": "get_technical_support",
+      "tone": "empathetic"
+    },
+    "metadata": {
+      "category": "technical",
+      "complexity": "complex",
+      "expected_tool": "get_technical_support"
+    }
+  },
+  {
+    "id": "tech-support-wifi",
+    "input": {
+      "query": "My router keeps dropping the WiFi connection every few hours."
+    },
+    "expected_output": {
+      "should_contain": ["restart", "firmware"],
+      "should_use_tool": "get_technical_support",
+      "tone": "empathetic"
+    },
+    "metadata": {
+      "category": "technical",
+      "complexity": "complex",
+      "expected_tool": "get_technical_support"
+    }
+  },
+  {
+    "id": "product-info-phones",
+    "input": {
+      "query": "What smartphones do you carry? I need something with a good camera."
+    },
+    "expected_output": {
+      "should_contain": ["camera", "phone"],
+      "should_use_tool": "get_product_info",
+      "tone": "helpful"
+    },
+    "metadata": {
+      "category": "product-info",
+      "complexity": "simple",
+      "expected_tool": "get_product_info"
+    }
+  },
+  {
+    "id": "product-info-comparison",
+    "input": {
+      "query": "Can you compare the TechMart Pro Laptop and the TechMart Ultra Laptop?"
+    },
+    "expected_output": {
+      "should_contain": ["specs", "price"],
+      "should_use_tool": "get_product_info",
+      "tone": "helpful"
+    },
+    "metadata": {
+      "category": "product-info",
+      "complexity": "medium",
+      "expected_tool": "get_product_info"
+    }
+  },
+  {
+    "id": "order-status",
+    "input": {
+      "query": "Where is my order ORD-12345? It was supposed to arrive yesterday."
+    },
+    "expected_output": {
+      "should_contain": ["order", "status"],
+      "tone": "empathetic"
+    },
+    "metadata": {
+      "category": "order-status",
+      "complexity": "simple",
+      "expected_tool": "lookup_order"
+    }
+  },
+  {
+    "id": "escalation-angry",
+    "input": {
+      "query": "This is the third time I am calling about this issue and nobody is helping me. I want to speak to a manager NOW."
+    },
+    "expected_output": {
+      "should_contain": ["apologize", "escalate"],
+      "tone": "empathetic"
+    },
+    "metadata": {
+      "category": "escalation",
+      "complexity": "complex",
+      "expected_tool": null
+    }
+  },
+  {
+    "id": "greeting-general",
+    "input": {
+      "query": "Hello! What can you help me with today?"
+    },
+    "expected_output": {
+      "should_contain": ["help", "support"],
+      "tone": "friendly"
+    },
+    "metadata": {
+      "category": "general",
+      "complexity": "simple",
+      "expected_tool": null
+    }
+  },
+  {
+    "id": "warranty-question",
+    "input": {
+      "query": "Does the TechMart Pro Laptop come with a warranty? What does it cover?"
+    },
+    "expected_output": {
+      "should_contain": ["warranty", "year"],
+      "tone": "helpful"
+    },
+    "metadata": {
+      "category": "warranty",
+      "complexity": "medium",
+      "expected_tool": null
+    }
+  },
+  {
+    "id": "multi-part-query",
+    "input": {
+      "query": "I want to buy a laptop. What are the specs and what is the return policy if I do not like it?"
+    },
+    "expected_output": {
+      "should_contain": ["specs", "return", "30 days"],
+      "tone": "helpful"
+    },
+    "metadata": {
+      "category": "multi-part",
+      "complexity": "complex",
+      "expected_tool": "get_product_info"
+    }
+  },
+  {
+    "id": "off-topic",
+    "input": {
+      "query": "What is the weather like in Seattle today?"
+    },
+    "expected_output": {
+      "should_contain": ["help", "support"],
+      "tone": "polite-redirect"
+    },
+    "metadata": {
+      "category": "off-topic",
+      "complexity": "simple",
+      "expected_tool": null
+    }
+  }
+]

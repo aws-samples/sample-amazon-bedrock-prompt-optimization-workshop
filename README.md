@@ -51,15 +51,15 @@ Build a production customer support agent while applying progressive optimizatio
 > **Note**: Part 2 requires infrastructure deployment. See [02-developer-journey/README.md](./02-developer-journey/README.md) for setup instructions.
 
 ### Part 3: Advanced Concepts
-*Estimated time: 2-2.5 hours*
+*Estimated time: 3-3.5 hours*
 
-Advanced prompt engineering techniques and complex caching patterns.
+Advanced prompt engineering techniques, complex caching patterns, and production prompt lifecycle management.
 
 | Topic | Duration | Description |
 |-------|----------|-------------|
 | [Advanced Prompt Engineering](./03-advanced-concepts/01-advanced-prompt-engineering.ipynb) | 60 min | CoT, Self-Critical, CoD, technique selection etc. |
 | [Advanced Prompt Caching](./03-advanced-concepts/02-advanced-prompt-caching.ipynb) | 60 min | Multi-checkpoint patterns, cache strategies etc. |
-| TBD | TBD | TBD |
+| [Production Prompt Lifecycle](./03-advanced-concepts/03-production-prompt-lifecycle.ipynb) | 75 min | Langfuse prompt management, evaluation datasets, LLM-as-Judge, CI/CD |
 
 ---
 
