@@ -43,11 +43,8 @@ JUDGE_MODEL_ID = os.environ.get(
     "EVAL_JUDGE_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0"
 )
 REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
-
-# System prompt used by the agent under test
-SYSTEM_PROMPT = """You are a helpful customer support assistant for TechMart Electronics.
-Help customers with: product information, return policies, technical support, and order inquiries.
-Be concise and professional. If you cannot answer, offer to escalate."""
+PROMPT_NAME = os.environ.get("EVAL_PROMPT_NAME", "customer-support-system")
+PROMPT_LABEL = os.environ.get("EVAL_PROMPT_LABEL", "draft")
 
 
 # ---------------------------------------------------------------------------
@@ -75,11 +72,11 @@ def _init_langfuse():
         return None
 
 
-def _call_agent(query: str, bedrock_client) -> dict:
+def _call_agent(query: str, system_prompt: str, bedrock_client) -> dict:
     """Call the agent under test via Bedrock Converse API."""
     response = bedrock_client.converse(
         modelId=MODEL_ID,
-        system=[{"text": SYSTEM_PROMPT}],
+        system=[{"text": system_prompt}],
         messages=[{"role": "user", "content": [{"text": query}]}],
         inferenceConfig={"maxTokens": 500, "temperature": 0.0},
     )
@@ -168,6 +165,13 @@ def run_evaluation() -> dict:
             "avg_score": 0.0, "pass_rate": 0.0,
         }
 
+    # Fetch the prompt under test from Langfuse (default: "draft" label)
+    prompt_obj = langfuse.get_prompt(PROMPT_NAME, label=PROMPT_LABEL)
+    system_prompt = prompt_obj.compile()
+    model_config = prompt_obj.config
+    print(f"Evaluating prompt: {PROMPT_NAME} (v{prompt_obj.version}, label={PROMPT_LABEL})")
+    print(f"  Text: {system_prompt[:80]}...")
+
     langfuse_dataset = langfuse.get_dataset(name=DATASET_NAME)
     print(f"Loaded dataset '{DATASET_NAME}' from Langfuse "
           f"({len(langfuse_dataset.items)} items)")
@@ -184,7 +188,7 @@ def run_evaluation() -> dict:
         expected = item.expected_output or {}
         item_id = (item.metadata or {}).get("id", f"item-{len(results)}")
 
-        agent_result = _call_agent(query, bedrock)
+        agent_result = _call_agent(query, system_prompt, bedrock)
         agent_response = agent_result["text"]
 
         # Report model usage to Langfuse for cost tracking
@@ -292,6 +296,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("  Prompt Evaluation Pipeline")
     print("=" * 60)
+    print(f"  Prompt:           {PROMPT_NAME} (label={PROMPT_LABEL})")
     print(f"  Dataset:          {DATASET_NAME}")
     print(f"  Model:            {MODEL_ID}")
     print(f"  Judge Model:      {JUDGE_MODEL_ID}")
