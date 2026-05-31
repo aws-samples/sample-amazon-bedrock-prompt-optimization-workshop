@@ -9,25 +9,32 @@ from __future__ import annotations
 
 PRICING = {
     # Global CRIS profile - recommended for most use cases
-    "global.anthropic.claude-sonnet-4-5-20250929-v1:0": {
-        "name": "Claude Sonnet 4.5 (Global)",
+    "global.anthropic.claude-sonnet-4-6": {
+        "name": "Claude Sonnet 4.6 (Global)",
         "input": 3.00,
         "output": 15.00,
         # 5-minute cache pricing (standard TTL)
         "cache_write_5m": 3.75,  # 1.25x input - first time writing to cache
         "cache_read_5m": 0.30,  # 0.1x input - 90% savings on cache hits!
     },
-    "global.anthropic.claude-3-5-haiku-20241022-v1:0": {
+    "global.anthropic.claude-haiku-4-5-20251001-v1:0": {
         "name": "Claude Haiku 4.5 (Global)",
         "input": 1.00,
         "output": 5.00,
         "cache_write_5m": 1.25,
         "cache_read_5m": 0.10,
     },
+    "global.anthropic.claude-opus-4-8": {
+        "name": "Claude Opus 4.8 (Global)",
+        "input": 5.00,
+        "output": 25.00,
+        "cache_write_5m": 6.25,  # 1.25x input
+        "cache_read_5m": 0.50,  # 0.1x input
+    },
 }
 
 # Output burndown rate for TPM quota calculation
-OUTPUT_BURNDOWN_RATE = 5  # For Claude Sonnet 4.5 and newer
+OUTPUT_BURNDOWN_RATE = 5  # For Claude Sonnet 4.6 and newer
 
 
 def calculate_cost(input_tokens, output_tokens, num_requests, model_id, cache_write_tokens=0, cache_read_tokens=0):
@@ -124,7 +131,7 @@ def calculate_tpm_reservation(input_tokens, max_tokens, burndown_rate=OUTPUT_BUR
     Args:
         input_tokens: Number of input tokens
         max_tokens: The max_tokens setting in the API call
-        burndown_rate: Output token burndown rate (default 5x for Claude Sonnet 4.5)
+        burndown_rate: Output token burndown rate (default 5x for Claude Sonnet 4.6)
 
     Returns:
         int: Total TPM quota reserved
@@ -142,7 +149,7 @@ def calculate_tpm_actual(input_tokens, output_tokens, cache_write_tokens=0, burn
         input_tokens: Number of input tokens
         output_tokens: Actual output tokens generated
         cache_write_tokens: Tokens written to cache
-        burndown_rate: Output token burndown rate (default 5x for Claude Sonnet 4.5)
+        burndown_rate: Output token burndown rate (default 5x for Claude Sonnet 4.6)
 
     Returns:
         int: Actual TPM consumed

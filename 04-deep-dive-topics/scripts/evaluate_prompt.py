@@ -37,7 +37,7 @@ DATASET_NAME = os.environ.get("EVAL_DATASET_NAME", "customer-support-eval")
 SCORE_THRESHOLD = float(os.environ.get("EVAL_SCORE_THRESHOLD", "0.7"))
 PASS_RATE_THRESHOLD = float(os.environ.get("EVAL_PASS_RATE_THRESHOLD", "0.8"))
 MODEL_ID = os.environ.get(
-    "EVAL_MODEL_ID", "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    "EVAL_MODEL_ID", "global.anthropic.claude-sonnet-4-6"
 )
 JUDGE_MODEL_ID = os.environ.get(
     "EVAL_JUDGE_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0"

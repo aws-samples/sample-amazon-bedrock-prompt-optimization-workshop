@@ -1,6 +1,8 @@
-# AWS Bedrock Prompt Optimization Workshop
+# Optimizing Cost, Latency, and Quality on Amazon Bedrock
 
-This hands-on workshop teaches you how to build production-grade generative AI applications with a focus on cost optimization, performance enhancement, and operational excellence.
+This hands-on workshop teaches you how to cut cost and latency in production GenAI applications on Amazon Bedrock without sacrificing quality.
+
+> **Companion code repository.** This repo holds the runnable notebooks. The narrated walkthrough lives in [AWS Workshop Studio](https://catalog.us-east-1.prod.workshops.aws/workshops/60d21a0a-c56f-47aa-9e5d-45181cd42507/en-US) — follow it alongside these notebooks.
 
 **Target Audience**: AI/ML Developers, Software Engineers working with agentic systems, DevOps Engineers deploying GenAI workloads
 
@@ -20,46 +22,56 @@ This workshop focuses on optimizing three key metrics for production GenAI appli
 
 ## Workshop Structure
 
-This workshop is organized into progressive parts:
+Four progressive tracks. Work them in this order (the folder prefixes are clone artifacts, not the sequence):
 
-### Part 1: Basics - Fundamentals
-*Estimated time: 1.5 hours*
+### Part 1: Fundamentals — `01-fundamentals/`
+*Estimated time: 1.25 hours*
 
-Build a solid understanding of tokens, pricing, and optimization strategies.
-
-| Topic | Duration | Description |
-|-------|----------|-------------|
-| [Prompts 101](./01-basics/01-prompts-101.ipynb) | 30 min | Tokens, pricing, TPM/RPM, terminology |
-| [Optimization Strategy](./01-basics/02-optimization-strategy.ipynb) | 45 min | Model selection, prompt design, parameter tuning, basic caching |
-| [Langfuse Observability](./01-basics/03-langfuse-observability.ipynb) | 30 min | LLM tracing, cost tracking, prompt management with Langfuse |
-
-### Part 2: Developer Journey
-*Estimated time: 3 hours*
-
-Build a production customer support agent while applying progressive optimization techniques.
+Get your tooling and vocabulary in place: notebooks, token economics, latency metrics, observability.
 
 | Topic | Duration | Description |
 |-------|----------|-------------|
-| [Baseline Agent](./02-developer-journey/01-baseline-agent.ipynb) | 20 min | Build unoptimized baseline agent, establish metrics |
-| [Quick Wins](./02-developer-journey/02-quick-wins.ipynb) | 20 min | Concise prompts, max_tokens, stop_sequences |
-| [Prompt Caching](./02-developer-journey/03-prompt-caching.ipynb) | 30 min | System prompt and tool definition caching |
-| [LLM Routing](./02-developer-journey/04-llm-routing.ipynb) | 30 min | Route queries to appropriate models by complexity |
-| [Guardrails](./02-developer-journey/05-guardrails.ipynb) | 30 min | Bedrock Guardrails for topic/content filtering |
-| [AgentCore Gateway](./02-developer-journey/06-agentcore-gateway.ipynb) | 45 min | Semantic tool search, centralized tool management |
-| [Evaluations](./02-developer-journey/07-evaluations.ipynb) | 30 min | Systematic evaluation across all agent versions |
+| [Jupyter Notebook 101](./01-fundamentals/00-jupyter-notebook-101.ipynb) | 15 min | Kernels, cells, shortcuts, first Bedrock call |
+| [Prompts 101](./01-fundamentals/01-prompts-101.ipynb) | 30 min | Tokens, pricing, TPM/RPM, CRIS, Converse API, Bedrock Mantle |
+| [Langfuse Observability](./01-fundamentals/02-langfuse-observability.ipynb) | 30 min | LLM tracing, cost tracking, prompt management with Langfuse |
 
-> **Note**: Part 2 requires infrastructure deployment. See [02-developer-journey/README.md](./02-developer-journey/README.md) for setup instructions.
+### Part 2: Optimization Playbook — `02-optimization-playbook/`
+*Estimated time: ~2 hours*
 
-### Part 3: Advanced Concepts
-*Estimated time: 3-3.5 hours*
+The sixteen cost-and-latency levers, organized into three effort tiers. One consolidated notebook per tier; start LOW, earn HIGH.
 
-Advanced prompt engineering techniques, complex caching patterns, and production prompt lifecycle management.
+| Notebook | Duration | Levers |
+|----------|----------|--------|
+| [LOW effort](./02-optimization-playbook/01-low-effort.ipynb) | 45 min | Model selection, prompt design, parameter tuning, prompt caching, prompt engineering tricks (+ managed APO), adaptive thinking |
+| [MEDIUM effort](./02-optimization-playbook/02-medium-effort.ipynb) | 60 min | LLM routing, Guardrails, RAG, prompt compression, conversation & memory (incl. AgentCore Memory), batch inference |
+| [HIGH effort](./02-optimization-playbook/03-high-effort.ipynb) | 60 min | Sub-agent delegation (Claude Agent SDK), tool search via MCP Gateway (+ concept: harness engineering, GEPA/DSPy) |
+
+### Part 3: Developer Journey — `03-developer-journey/`
+*Estimated time: 3.5 hours*
+
+Apply the levers to one production-ready TechMart Electronics customer support agent through 7 progressive labs, each improving the last.
 
 | Topic | Duration | Description |
 |-------|----------|-------------|
-| [Advanced Prompt Engineering](./03-advanced-concepts/01-advanced-prompt-engineering.ipynb) | 60 min | CoT, Self-Critical, CoD, technique selection etc. |
-| [Advanced Prompt Caching](./03-advanced-concepts/02-advanced-prompt-caching.ipynb) | 60 min | Multi-checkpoint patterns, cache strategies etc. |
-| [Production Prompt Lifecycle](./03-advanced-concepts/03-production-prompt-lifecycle.ipynb) | 75 min | Langfuse prompt management, evaluation datasets, LLM-as-Judge, CI/CD |
+| [Baseline Agent](./03-developer-journey/01-baseline-agent.ipynb) | 20 min | Build unoptimized baseline agent, establish metrics |
+| [Quick Wins](./03-developer-journey/02-quick-wins.ipynb) | 20 min | Concise prompts, max_tokens, stop_sequences |
+| [Prompt Caching](./03-developer-journey/03-prompt-caching.ipynb) | 30 min | System prompt and tool definition caching |
+| [LLM Routing](./03-developer-journey/04-llm-routing.ipynb) | 30 min | Route queries to appropriate models by complexity |
+| [Guardrails](./03-developer-journey/05-guardrails.ipynb) | 30 min | Bedrock Guardrails for topic/content filtering |
+| [AgentCore Gateway](./03-developer-journey/06-agentcore-gateway.ipynb) | 45 min | Semantic tool search, centralized tool management |
+| [Evaluations](./03-developer-journey/07-evaluations.ipynb) | 30 min | Systematic evaluation across all agent versions |
+
+> **Note**: Part 3 requires infrastructure deployment. See [03-developer-journey/README.md](./03-developer-journey/README.md) for setup instructions.
+
+### Part 4: Deep Dives — `04-deep-dive-topics/`
+*Estimated time: 2.25 hours*
+
+Two standalone deep-dive topics: deep-dive caching patterns, and the production prompt lifecycle (versioned, eval-gated, CI/CD-managed prompts).
+
+| Topic | Duration | Description |
+|-------|----------|-------------|
+| [Advanced Prompt Caching](./04-deep-dive-topics/01-advanced-prompt-caching.ipynb) | 60 min | Multi-checkpoint patterns, cache strategies |
+| [Production Prompt Lifecycle](./04-deep-dive-topics/02-production-prompt-lifecycle.ipynb) | 75 min | Langfuse prompt management, evaluation datasets, LLM-as-Judge, CI/CD |
 
 ---
 

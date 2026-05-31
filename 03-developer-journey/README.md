@@ -1,4 +1,4 @@
-# Prompt Optimization Workshop - Developer Journey
+# Part 3: Developer Journey
 
 ## Overview
 
@@ -26,7 +26,7 @@ cp .env.example .env
 # Edit .env with your AWS_PROFILE and other settings
 ```
 
-Deploy the infrastructure using Make (from `02-developer-journey/`):
+Deploy the infrastructure using Make (from `03-developer-journey/`):
 
 ```bash
 # Check environment configuration
@@ -186,7 +186,7 @@ Your optimized agent should achieve:
 ## Files Structure
 
 ```
-02-developer-journey/
+03-developer-journey/
 ├── Makefile                  # Infrastructure deployment (reads ../.env)
 ├── requirements.txt          # Python dependencies
 ├── pyproject.toml            # UV project config

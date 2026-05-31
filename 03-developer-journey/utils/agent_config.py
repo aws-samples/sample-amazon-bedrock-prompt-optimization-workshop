@@ -52,7 +52,7 @@ def classify_query_complexity(query: str) -> str:
 
 
 # Cross-region inference model IDs
-MODEL_SONNET = "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+MODEL_SONNET = "global.anthropic.claude-sonnet-4-6"
 MODEL_HAIKU = "global.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 # Optimized system prompt with clear structure and few-shot examples (~1,030 tokens)
