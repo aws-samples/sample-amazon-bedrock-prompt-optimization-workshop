@@ -3,7 +3,8 @@
     "id": "simple-policy",
     "query": "What is your return policy for smartphones?",
     "expected_tool": "get_return_policy",
-    "category": "simple"
+    "category": "simple",
+    "reference": "Smartphones can be returned within 30 days. Items must be in original packaging with no physical damage and require a factory reset. Returns are processed through the online RMA portal or technical support, with refunds issued 5-7 business days after inspection. Return shipping is free with a prepaid label. A 1-year manufacturer warranty is included. There is no restocking fee for unopened items, but a 15% restocking fee applies to opened items."
   },
   {
     "id": "laptop-policy",
@@ -15,25 +16,31 @@
     "id": "product-info",
     "query": "Tell me about laptop specifications",
     "expected_tool": "get_product_info",
-    "category": "simple"
+    "category": "simple",
+    "reference": "Our featured laptop is the TechMart Pro 15 at $1,299. It has an Intel Core i7-13700H processor (14 cores, up to 5.0GHz), 16GB DDR5 RAM (upgradeable to 32GB), a 512GB NVMe SSD, a 15.6-inch FHD IPS display with a 144Hz refresh rate, NVIDIA RTX 4060 6GB graphics, a 72Wh battery rated up to 10 hours, and weighs 4.5 lbs. It is available in Space Gray, Silver, and Midnight Blue, is in stock, and ships in 2-3 business days."
   },
   {
     "id": "phone-specs",
     "query": "What are the specs on your smartphones?",
     "expected_tool": "get_product_info",
-    "category": "simple"
+    "category": "simple",
+    "reference": "Our featured smartphone is the TechMart Phone X at $899. It has a Snapdragon 8 Gen 2 processor, 8GB RAM, 256GB of non-expandable storage, a 6.7-inch AMOLED display at 120Hz (2400x1080), a triple camera (50MP main, 12MP ultrawide, 10MP telephoto), a 5000mAh battery with 65W fast charging, Android 14, and 5G, Wi-Fi 6E, and Bluetooth 5.3 connectivity. It comes in Obsidian Black, Pearl White, and Ocean Blue, is in stock, and ships in 1-2 business days."
   },
   {
     "id": "tech-support-power",
     "query": "My laptop won't turn on, help me troubleshoot",
     "expected_tool": "get_technical_support",
-    "category": "complex"
+    "category": "complex",
+    "is_rag": true,
+    "reference": "To troubleshoot a laptop that won't turn on: confirm the power adapter is securely connected and the outlet works; let the battery charge for at least 15-30 minutes before retrying; perform a hard reset by holding the power button for 15-20 seconds with the charger connected; disconnect external peripherals and try again; and check that the charging indicator light comes on. If there is still no response after these steps, the issue may require professional repair or warranty service."
   },
   {
     "id": "tech-support-wifi",
     "query": "I can't connect to WiFi on my new laptop",
     "expected_tool": "get_technical_support",
-    "category": "complex"
+    "category": "complex",
+    "is_rag": true,
+    "reference": "To resolve Wi-Fi connection problems on a new laptop: toggle Wi-Fi off and back on and confirm airplane mode is disabled; restart both the laptop and the router; forget the network and reconnect by re-entering the password; update or reinstall the wireless network adapter drivers; and run the operating system's network troubleshooter. Verify other devices can reach the same network to isolate whether the issue is the laptop or the router. If the connection still fails, contact technical support for further diagnosis."
   },
   {
     "id": "tech-support-battery",
@@ -45,7 +52,8 @@
     "id": "multi-tool",
     "query": "I want to return my laptop and need to know the specs first",
     "expected_tools": ["get_product_info", "get_return_policy"],
-    "category": "complex"
+    "category": "complex",
+    "reference": "The TechMart Pro 15 laptop ($1,299) features an Intel Core i7-13700H processor, 16GB DDR5 RAM, a 512GB NVMe SSD, a 15.6-inch 144Hz FHD display, and NVIDIA RTX 4060 graphics. For returns, laptops can be returned within 30 days in original packaging with all accessories and no physical damage, through the online RMA portal or in-store. Refunds are issued 7-10 business days after inspection. Return shipping is free for defects; the customer pays for change-of-mind returns, which carry a 15% restocking fee. A 1-year manufacturer warranty is included."
   },
   {
     "id": "shipping-simple",
