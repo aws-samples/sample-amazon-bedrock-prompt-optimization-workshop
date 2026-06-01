@@ -2,7 +2,7 @@
 Pricing and cost calculation utilities for AWS Bedrock.
 """
 
-# Pricing per 1M tokens (as of January 2026)
+# Pricing per 1M tokens (as of Jun 2026)
 # Using global CRIS profile pricing (~10% savings vs in-region)
 # Always verify current pricing at: https://aws.amazon.com/bedrock/pricing/
 from __future__ import annotations
@@ -159,7 +159,7 @@ def calculate_tpm_actual(input_tokens, output_tokens, cache_write_tokens=0, burn
 
 def print_pricing_table():
     """Print a formatted pricing table for all models."""
-    print("Model Pricing (per 1M tokens) - as of January 2026:")
+    print("Model Pricing (per 1M tokens) - as of Jun 2026:")
     print("=" * 90)
     print(f"{'Model':<30} {'Input':>10} {'Output':>10} {'Cache Write':>14} {'Cache Read':>14}")
     print(f"{'':<30} {'':>10} {'':>10} {'(5m, 1.25x)':>14} {'(5m, 0.1x)':>14}")
