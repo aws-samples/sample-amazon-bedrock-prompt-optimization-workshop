@@ -2,7 +2,6 @@
 V2 Quick Wins Agent - Low-effort optimizations.
 - Concise system prompt
 - max_tokens limit
-- stop_sequences
 - Low temperature for accuracy
 """
 
@@ -36,7 +35,6 @@ def invoke(payload):
         model_id=MODEL_SONNET,
         temperature=0.1,
         max_tokens=1024,
-        stop_sequences=["###", "END_RESPONSE"],
         region_name=os.environ.get("AWS_DEFAULT_REGION", "us-east-1"),
     )
 

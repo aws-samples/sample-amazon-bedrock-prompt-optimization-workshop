@@ -63,7 +63,7 @@ make help            # Show all commands
 ## Workshop Journey
 
 ```
-01 Baseline → 02 Quick Wins → 03 Caching → 04 Routing → 05 Guardrails → 06 Gateway → 07 Evaluations
+01 Baseline → 02 Quick Wins → 03 Caching → 04 Routing → 05 Guardrails → 06 Skills + Gateway → 07 Evaluations
 ```
 
 ---
@@ -86,9 +86,9 @@ Create an unoptimized baseline agent to establish metrics.
 Apply quick optimization techniques for immediate gains.
 
 **Optimizations**:
-- Concise system prompt (~60% token reduction)
+- Well-structured system prompt (restructured for clarity, not shortened)
 - `max_tokens` limit (bounded output)
-- `stop_sequences` (early termination)
+- Low `temperature` (consistent, factual responses)
 
 ---
 
@@ -125,12 +125,13 @@ Add Bedrock Guardrails to filter off-topic queries.
 
 ---
 
-### **06-agentcore-gateway.ipynb** (45 min)
+### **06-skills-and-gateway.ipynb** (45 min)
 
-Integrate AgentCore Gateway for centralized tool management.
+Progressive disclosure on both sides of the agent: load instructions and tools only when a query needs them.
 
 **Optimizations**:
-- Semantic tool search (load only relevant tools)
+- Agent Skills — move a verbose instruction block out of the prompt, load on demand
+- Semantic tool search via AgentCore Gateway (load only relevant tools)
 - Reduced context size (up to 75% fewer tool tokens)
 - MCP-compatible tool sharing
 
@@ -195,7 +196,7 @@ Your optimized agent should achieve:
 ├── 03-prompt-caching.ipynb   # Notebook 3
 ├── 04-llm-routing.ipynb      # Notebook 4
 ├── 05-guardrails.ipynb       # Notebook 5
-├── 06-agentcore-gateway.ipynb # Notebook 6
+├── 06-skills-and-gateway.ipynb # Notebook 6
 ├── 07-evaluations.ipynb      # Notebook 7
 ├── agents/                   # Agent implementations
 │   ├── v1_baseline.py
@@ -203,7 +204,7 @@ Your optimized agent should achieve:
 │   ├── v3_caching.py
 │   ├── v4_routing.py
 │   ├── v5_guardrails.py
-│   └── v6_gateway.py
+│   └── v6_skills_and_gateway.py
 ├── utils/                    # Helper modules
 │   ├── agent_config.py
 │   ├── tools.py

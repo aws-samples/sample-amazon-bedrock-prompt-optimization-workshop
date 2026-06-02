@@ -1,4 +1,4 @@
-strands-agents[otel]>=1.21.0
+strands-agents[otel]>=1.30.0
 strands-agents-tools>=0.2.19
 boto3>=1.42.25
 bedrock-agentcore-starter-toolkit>=0.2.5

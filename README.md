@@ -1,22 +1,22 @@
 # Optimizing Cost, Latency, and Quality on Amazon Bedrock
 
-This hands-on workshop teaches you how to cut cost and latency in production GenAI applications on Amazon Bedrock without sacrificing quality.
+This hands-on workshop teaches you how to cut cost and latency in production agentic applications on Amazon Bedrock without sacrificing quality.
 
 > **Companion code repository.** This repo holds the runnable notebooks. The narrated walkthrough lives in [AWS Workshop Studio](https://catalog.us-east-1.prod.workshops.aws/workshops/60d21a0a-c56f-47aa-9e5d-45181cd42507/en-US) — follow it alongside these notebooks.
 
-**Target Audience**: AI/ML Developers, Software Engineers working with agentic systems, DevOps Engineers deploying GenAI workloads
+**Target Audience**: AI/ML Developers, Software Engineers working with agentic systems, DevOps Engineers deploying agentic workloads
 
 ---
 
 ## Workshop Objectives
 
-This workshop focuses on optimizing three key metrics for production GenAI applications:
+This workshop focuses on optimizing three key metrics for production agentic applications:
 
 | Objective | Definition | Why It Matters |
 |-----------|------------|----------------|
-| **Accuracy** | The quality and correctness of model outputs relative to expected results | Ensures your application delivers value to users and meets business requirements |
 | **Cost** | Total expenditure on model inference, including input tokens, output tokens, and cache operations | Controls operational expenses and enables sustainable scaling |
 | **Latency** | Time elapsed from request initiation to response completion | Impacts user experience and application responsiveness |
+| **Quality** | How correct, relevant, and grounded the agent's outputs are, measured with evals | Ensures your application delivers value to users and meets business requirements |
 
 ---
 
@@ -54,11 +54,11 @@ Apply the levers to one production-ready TechMart Electronics customer support a
 | Topic | Duration | Description |
 |-------|----------|-------------|
 | [Baseline Agent](./03-developer-journey/01-baseline-agent.ipynb) | 20 min | Build unoptimized baseline agent, establish metrics |
-| [Quick Wins](./03-developer-journey/02-quick-wins.ipynb) | 20 min | Concise prompts, max_tokens, stop_sequences |
+| [Quick Wins](./03-developer-journey/02-quick-wins.ipynb) | 20 min | Structured prompts, max_tokens, temperature |
 | [Prompt Caching](./03-developer-journey/03-prompt-caching.ipynb) | 30 min | System prompt and tool definition caching |
 | [LLM Routing](./03-developer-journey/04-llm-routing.ipynb) | 30 min | Route queries to appropriate models by complexity |
 | [Guardrails](./03-developer-journey/05-guardrails.ipynb) | 30 min | Bedrock Guardrails for topic/content filtering |
-| [AgentCore Gateway](./03-developer-journey/06-agentcore-gateway.ipynb) | 45 min | Semantic tool search, centralized tool management |
+| [Skills & Gateway](./03-developer-journey/06-skills-and-gateway.ipynb) | 45 min | Progressive disclosure: agent skills + semantic tool search |
 | [Evaluations](./03-developer-journey/07-evaluations.ipynb) | 30 min | Systematic evaluation across all agent versions |
 
 > **Note**: Part 3 requires infrastructure deployment. See [03-developer-journey/README.md](./03-developer-journey/README.md) for setup instructions.

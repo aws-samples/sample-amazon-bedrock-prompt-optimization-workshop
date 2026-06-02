@@ -1,6 +1,6 @@
 """
 V3 Caching Agent - Same as v2 + prompt caching.
-- All v2 optimizations (structured prompt, max_tokens, stop_sequences, low temperature)
+- All v2 optimizations (structured prompt, max_tokens, low temperature)
 - System prompt caching with SystemContentBlock + cachePoint (provider-agnostic)
 - Tool definition caching with cache_tools="default" on BedrockModel
 - Note: System prompt must be 1,024+ tokens for caching to activate
@@ -41,7 +41,6 @@ def invoke(payload):
         model_id=MODEL_SONNET,
         temperature=0.1,
         max_tokens=1024,
-        stop_sequences=["###", "END_RESPONSE"],
         cache_tools="default",
         region_name=os.environ.get("AWS_DEFAULT_REGION", "us-east-1"),
     )

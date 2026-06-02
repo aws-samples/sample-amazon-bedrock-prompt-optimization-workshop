@@ -78,6 +78,63 @@ def deploy_agent_to_runtime(
     return launch_result.agent_arn
 
 
+def ensure_runtime_permissions(region: str | None = None) -> None:
+    """Attach the shared customer-support permission set to the agent's execution role.
+
+    The AgentCore toolkit auto-creates a separate execution role per agent, scoped to
+    that agent's ECR repo and workload identity. Those roles do NOT include the
+    permissions our tools need at runtime:
+
+    - ssm:GetParameter      -- get_technical_support reads the KB ID from SSM
+    - bedrock:Retrieve      -- get_technical_support queries the Bedrock Knowledge Base
+    - bedrock:ApplyGuardrail -- v5+ agents attach a guardrail to model invocations
+
+    Call this once after launch() in each runtime lab to give every agent the same
+    permission set. Idempotent: re-running overwrites the same inline policy. Reads the
+    execution role from .bedrock_agentcore.yaml (written by configure()).
+    """
+    region = region or os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+
+    import yaml
+
+    config = yaml.safe_load(Path(".bedrock_agentcore.yaml").read_text())
+    default_agent = config["default_agent"]
+    exec_role_arn = config["agents"][default_agent]["aws"]["execution_role"]
+    role_name = exec_role_arn.split("/")[-1]
+
+    account_id = boto3.client("sts").get_caller_identity()["Account"]
+    policy = {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "KnowledgeBaseIdLookup",
+                "Effect": "Allow",
+                "Action": "ssm:GetParameter",
+                "Resource": f"arn:aws:ssm:{region}:{account_id}:parameter/{account_id}-{region}/kb/knowledge-base-id",
+            },
+            {
+                "Sid": "KnowledgeBaseRetrieve",
+                "Effect": "Allow",
+                "Action": "bedrock:Retrieve",
+                "Resource": f"arn:aws:bedrock:{region}:{account_id}:knowledge-base/*",
+            },
+            {
+                "Sid": "ApplyGuardrail",
+                "Effect": "Allow",
+                "Action": "bedrock:ApplyGuardrail",
+                "Resource": f"arn:aws:bedrock:{region}:{account_id}:guardrail/*",
+            },
+        ],
+    }
+    boto3.client("iam").put_role_policy(
+        RoleName=role_name,
+        PolicyName="CustomerSupportRuntimeAccess",
+        PolicyDocument=json.dumps(policy),
+    )
+    print(f"Granted customer-support runtime permissions to {role_name}")
+    time.sleep(10)  # allow IAM propagation before the first invocation
+
+
 def invoke_agent(data_client, agent_arn: str, prompt: str) -> dict:
     """Invoke agent via AgentCore API."""
     response = data_client.invoke_agent_runtime(
