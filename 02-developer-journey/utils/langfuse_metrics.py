@@ -487,10 +487,7 @@ def print_comparison(
         # never "-21.8% latency increase").
         cost_word = "reduction" if cost_change < 0 else "increase"
         latency_word = "improvement" if latency_change < 0 else "increase"
-        print(
-            f"\nResult: {abs(cost_change):.1f}% cost {cost_word}, "
-            f"{abs(latency_change):.1f}% latency {latency_word}"
-        )
+        print(f"\nResult: {abs(cost_change):.1f}% cost {cost_word}, {abs(latency_change):.1f}% latency {latency_word}")
     else:
         print(f"\n⚠️  Enter your {prev_name} metrics above to see the comparison")
 

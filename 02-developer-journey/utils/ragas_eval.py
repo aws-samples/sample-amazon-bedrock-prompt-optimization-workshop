@@ -65,9 +65,7 @@ def build_bedrock_evaluator(judge_model_id: str = MODEL_SONNET, region: str | No
 
     region = region or os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 
-    judge = LangchainLLMWrapper(
-        ChatBedrockConverse(model=judge_model_id, region_name=region, temperature=0.0)
-    )
+    judge = LangchainLLMWrapper(ChatBedrockConverse(model=judge_model_id, region_name=region, temperature=0.0))
     embeddings = LangchainEmbeddingsWrapper(
         BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0", region_name=region)
     )
@@ -267,8 +265,9 @@ def normalize_trace_tool_names(raw_names: list[str]) -> list[str]:
     return out
 
 
-def find_trace_id_by_query(agent_trace_name: str, query: str, wait_seconds: int = 5,
-                           max_retries: int = 6) -> str | None:
+def find_trace_id_by_query(
+    agent_trace_name: str, query: str, wait_seconds: int = 5, max_retries: int = 6
+) -> str | None:
     """Find the trace_id for a SPECIFIC invocation, matched by its query text.
 
     `get_latest_trace_metrics` matches only by agent name and returns whatever

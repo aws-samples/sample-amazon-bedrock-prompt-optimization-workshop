@@ -124,9 +124,7 @@ def invoke(payload):
             parent_span.set_attribute("guardrail.blocked", True)
             parent_span.set_attribute("guardrail.blocked_by", ", ".join(policies))
             parent_span.set_attribute("langfuse.tags", ["guardrails", "guardrail-blocked"])
-            parent_span.set_attribute(
-                "langfuse.observation.output", json.dumps({"response": BLOCK_MESSAGE})
-            )
+            parent_span.set_attribute("langfuse.observation.output", json.dumps({"response": BLOCK_MESSAGE}))
             telemetry.tracer_provider.force_flush()
             return {
                 "response": BLOCK_MESSAGE,
