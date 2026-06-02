@@ -66,7 +66,15 @@ SYSTEM_PROMPT = [
 
 
 def classify_query_with_llm(query: str, region: str) -> str:
-    """Use Haiku to classify query complexity."""
+    """Use Haiku to classify query complexity.
+
+    Defaults to "complex" (route to the more capable Sonnet) on any classifier
+    failure or unexpected output. This is a deliberate safe-but-costlier default:
+    a misrouted-to-cheap query degrades the answer, whereas a misrouted-to-capable
+    query only costs more. Note this is a blanket fallback, not retriable-vs-
+    non-retriable error handling — production routers should distinguish 429/503
+    (retry/reroute) from 400 (fail) rather than collapsing all failures here.
+    """
     classifier_model = BedrockModel(
         model_id=MODEL_HAIKU,
         temperature=0,
@@ -83,8 +91,11 @@ def classify_query_with_llm(query: str, region: str) -> str:
             "langfuse.tags": ["routing", "classifier"],
         },
     )
-    result = classifier(query)
-    response_text = result.message["content"][0]["text"].strip().lower()
+    try:
+        result = classifier(query)
+        response_text = result.message["content"][0]["text"].strip().lower()
+    except Exception:
+        return "complex"
 
     return "simple" if "simple" in response_text else "complex"
 
@@ -118,7 +129,6 @@ def invoke(payload):
             model_id=model_id,
             temperature=0.1,
             max_tokens=1024,
-            stop_sequences=["###", "END_RESPONSE"],
             cache_tools="default",
             region_name=region,
         )

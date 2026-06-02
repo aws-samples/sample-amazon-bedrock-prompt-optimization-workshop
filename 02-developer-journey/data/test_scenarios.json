@@ -32,7 +32,7 @@
     "expected_tool": "get_technical_support",
     "category": "complex",
     "is_rag": true,
-    "reference": "To troubleshoot a laptop that won't turn on: confirm the power adapter is securely connected and the outlet works; let the battery charge for at least 15-30 minutes before retrying; perform a hard reset by holding the power button for 15-20 seconds with the charger connected; disconnect external peripherals and try again; and check that the charging indicator light comes on. If there is still no response after these steps, the issue may require professional repair or warranty service."
+    "reference": "Acknowledge that a laptop not turning on is frustrating and reassure the customer. Ask one or two diagnostic questions first: what exactly happens when the power button is pressed (any lights, sounds, or fan), and whether anything changed recently such as a drop, spill, or update. Then give a single first step to try: confirm the power cable is firmly connected at both ends and the wall outlet works, and watch for a charge indicator light. Ask the customer to report what happens before moving to the next step."
   },
   {
     "id": "tech-support-wifi",
@@ -40,7 +40,7 @@
     "expected_tool": "get_technical_support",
     "category": "complex",
     "is_rag": true,
-    "reference": "To resolve Wi-Fi connection problems on a new laptop: toggle Wi-Fi off and back on and confirm airplane mode is disabled; restart both the laptop and the router; forget the network and reconnect by re-entering the password; update or reinstall the wireless network adapter drivers; and run the operating system's network troubleshooter. Verify other devices can reach the same network to isolate whether the issue is the laptop or the router. If the connection still fails, contact technical support for further diagnosis."
+    "reference": "Acknowledge that not getting a new laptop online is frustrating and reassure the customer. Give a single first step rather than a full checklist: toggle airplane mode on and then back off, then try reconnecting to the network. Ask the customer to report whether that step worked before moving on."
   },
   {
     "id": "tech-support-battery",

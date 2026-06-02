@@ -1,5 +1,7 @@
 """
-V6 Gateway Agent - AgentCore Gateway with semantic tool search.
+V6 agent - focused on Agent Skills and the MCP Gateway. Progressive disclosure on
+both sides: an on-demand troubleshooting skill (instructions) plus AgentCore
+Gateway with semantic tool search (tools).
 """
 
 from __future__ import annotations
@@ -7,6 +9,7 @@ from __future__ import annotations
 import base64
 import os
 import uuid
+from pathlib import Path
 
 import httpx
 import requests
@@ -19,11 +22,12 @@ from strands.telemetry import StrandsTelemetry
 from strands.tools.mcp import MCPClient
 from strands.tools.mcp.mcp_client import MCPAgentTool
 from strands.types.content import SystemContentBlock
+from strands.vended_plugins.skills import AgentSkills
 
 from utils.agent_config import (
     MODEL_HAIKU,
     MODEL_SONNET,
-    SYSTEM_PROMPT_TEXT,
+    SYSTEM_PROMPT_CORE,
     classify_query_complexity,
     setup_langfuse_telemetry,
 )
@@ -41,8 +45,19 @@ COGNITO_CLIENT_SECRET = os.environ.get("COGNITO_CLIENT_SECRET")
 COGNITO_TOKEN_URL = os.environ.get("COGNITO_TOKEN_URL")
 COGNITO_SCOPE = os.environ.get("COGNITO_SCOPE")
 
+# v6 uses the LEAN core prompt (no troubleshooting block). The troubleshooting
+# method is provided on-demand by the device-troubleshooting skill, which only
+# loads when the agent activates it for a malfunction query — so non-technical
+# queries never carry that ~330-token block. Progressive disclosure for
+# instructions, mirroring the gateway's semantic tool search for tools.
+SKILL_DIR = str(Path(__file__).parent / "skills" / "device-troubleshooting")
+
+# Cache the (stable) core prompt, same as v2-v5. The cache point closes the cached
+# prefix; the AgentSkills plugin appends its skill-metadata block AFTER this point,
+# so activating a skill never invalidates the cached core. The 1,096-token core
+# clears Bedrock's 1,024-token caching floor on its own.
 SYSTEM_PROMPT = [
-    SystemContentBlock(text=SYSTEM_PROMPT_TEXT),
+    SystemContentBlock(text=SYSTEM_PROMPT_CORE),
     SystemContentBlock(cachePoint={"type": "default"}),
 ]
 
@@ -127,7 +142,8 @@ def invoke(payload, context=None):
             "model_id": model_id,
             "temperature": 0.1,
             "max_tokens": 1024,
-            "stop_sequences": ["###", "END_RESPONSE"],
+            # No stop_sequences: max_tokens + the model's own end_turn bound output;
+            # a markdown-collision stop string (e.g. "###") only risks truncating answers.
             "cache_tools": "default",
             "region_name": os.environ.get("AWS_DEFAULT_REGION", "us-east-1"),
         }
@@ -137,10 +153,16 @@ def invoke(payload, context=None):
             model_kwargs["guardrail_version"] = "DRAFT"
             model_kwargs["guardrail_trace"] = "enabled"
 
+        # On-demand instructions: the device-troubleshooting skill's metadata is
+        # injected into the (lean) system prompt; its full body loads only if the
+        # agent activates it for a malfunction query.
+        skills_plugin = AgentSkills(skills=[SKILL_DIR])
+
         agent = Agent(
             model=BedrockModel(**model_kwargs),
             tools=tools,
             system_prompt=SYSTEM_PROMPT,
+            plugins=[skills_plugin],
             name="customer-support-v6-gateway",
             trace_attributes={
                 "version": "v6-gateway",
@@ -153,9 +175,10 @@ def invoke(payload, context=None):
         response = agent(user_input)
         response_text = response.message["content"][0]["text"]
 
+        skill_used = bool(skills_plugin.get_activated_skills(agent))
         telemetry.tracer_provider.force_flush()
 
-        return {"response": response_text, "tools_loaded": len(tools)}
+        return {"response": response_text, "tools_loaded": len(tools), "skill_activated": skill_used}
 
 
 if __name__ == "__main__":

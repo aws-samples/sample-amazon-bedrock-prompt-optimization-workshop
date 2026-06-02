@@ -41,11 +41,11 @@ Build a production customer support agent while applying progressive optimizatio
 | Topic | Duration | Description |
 |-------|----------|-------------|
 | [Baseline Agent](./02-developer-journey/01-baseline-agent.ipynb) | 20 min | Build unoptimized baseline agent, establish metrics |
-| [Quick Wins](./02-developer-journey/02-quick-wins.ipynb) | 20 min | Concise prompts, max_tokens, stop_sequences |
+| [Quick Wins](./02-developer-journey/02-quick-wins.ipynb) | 20 min | Structured prompts, max_tokens, temperature |
 | [Prompt Caching](./02-developer-journey/03-prompt-caching.ipynb) | 30 min | System prompt and tool definition caching |
 | [LLM Routing](./02-developer-journey/04-llm-routing.ipynb) | 30 min | Route queries to appropriate models by complexity |
 | [Guardrails](./02-developer-journey/05-guardrails.ipynb) | 30 min | Bedrock Guardrails for topic/content filtering |
-| [AgentCore Gateway](./02-developer-journey/06-agentcore-gateway.ipynb) | 45 min | Semantic tool search, centralized tool management |
+| [Skills & Gateway](./02-developer-journey/06-skills-and-gateway.ipynb) | 45 min | Progressive disclosure: agent skills + semantic tool search |
 | [Evaluations](./02-developer-journey/07-evaluations.ipynb) | 30 min | Systematic evaluation across all agent versions |
 
 > **Note**: Part 2 requires infrastructure deployment. See [02-developer-journey/README.md](./02-developer-journey/README.md) for setup instructions.
