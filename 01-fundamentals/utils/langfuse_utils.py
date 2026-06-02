@@ -14,7 +14,7 @@ langfuse_context = get_client()
 
 MODEL_CONFIG = {
     "sonnet": {
-        "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model_id": "global.anthropic.claude-sonnet-4-6",
         "inferenceConfig": {"maxTokens": 4096, "temperature": 0},
     },
     "haiku": {
@@ -84,7 +84,7 @@ def convert_to_bedrock_messages(
 @observe(as_type="generation", name="Bedrock Converse")
 def converse(
     messages: list[dict[str, Any]],
-    model_id: str = "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model_id: str = "global.anthropic.claude-sonnet-4-6",
     prompt: PromptClient | None = None,
     metadata: dict[str, Any] | None = None,
     **kwargs,
@@ -141,7 +141,7 @@ def converse_tool_use(
     messages: list[dict[str, str]],
     tools: list[dict[str, str]],
     tool_choice: str = "auto",
-    model_id: str = "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    model_id: str = "global.anthropic.claude-sonnet-4-6",
     prompt: PromptClient | None = None,
     metadata: dict[str, Any] | None = None,
     **kwargs,

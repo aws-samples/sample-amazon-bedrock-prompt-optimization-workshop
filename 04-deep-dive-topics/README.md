@@ -1,28 +1,26 @@
-# Part 3: Advanced Concepts
+# Part 4: Deep Dives
 
 ## Overview
 
-This section covers advanced prompt engineering techniques, complex caching patterns, and production lifecycle management for GenAI systems. You will move from foundational knowledge into research-backed optimization methods, multi-checkpoint caching strategies, and a complete prompt CI/CD pipeline using Langfuse and AWS CodePipeline.
+Two standalone deep-dive topics that don't belong to the main Fundamentals → Playbook → Developer Journey progression — each self-contained: complex caching patterns and production prompt lifecycle management. (Advanced prompt-engineering techniques — CoT, Self-Refine, CoD, Verbalized Sampling — now live in the Optimization Playbook, Lever 05, alongside the managed Bedrock Advanced Prompt Optimization tool.)
 
-**Duration**: ~3.5 hours
+**Duration**: ~1 hour
 
 ---
 
 ## Learning Objectives
 
-After completing this section, you will:
-- Apply research-backed prompt engineering techniques (CoT, Self-Refine, CoD, etc.)
-- Select the right technique for your scenario based on cost/latency/quality trade-offs
+After completing these deep dives, you will:
 - Implement multi-checkpoint caching patterns with proper static/dynamic separation
-- Choose appropriate cache TTL strategies (5-minute vs 1-hour)
+- Choose appropriate cache TTL strategies (5-minute vs 1-hour) and debug low hit rates
 - Version and manage prompts in Langfuse with production labels
 - Build evaluation datasets and run LLM-as-Judge scoring
 - Integrate prompt evaluation into a CI/CD pipeline with quality gates
 
 ## Prerequisites
 
-- Complete [01-basics](../01-basics/) first
-- Complete [02-developer-journey](../02-developer-journey/) for Langfuse setup (required for notebook 03)
+- Complete [01-fundamentals](../01-fundamentals/) first
+- Complete [03-developer-journey](../03-developer-journey/) for Langfuse setup (required for notebook 03)
 - AWS Account with Amazon Bedrock access
 - Python 3.10+
 
@@ -30,26 +28,12 @@ After completing this section, you will:
 
 | Notebook | Duration | Description |
 |----------|----------|-------------|
-| [01-advanced-prompt-engineering](./01-advanced-prompt-engineering.ipynb) | 60 min | Technique categories, optimization workflows |
-| [02-advanced-prompt-caching](./02-advanced-prompt-caching.ipynb) | 60 min | Multi-checkpoint patterns, cache strategies |
-| [03-production-prompt-lifecycle](./03-production-prompt-lifecycle.ipynb) | 75 min | Langfuse prompt management, evaluation datasets, LLM-as-Judge, CI/CD |
+| [01-advanced-prompt-caching](./01-advanced-prompt-caching.ipynb) | 60 min | Multi-checkpoint patterns, cache strategies |
+| [02-production-prompt-lifecycle](./02-production-prompt-lifecycle.ipynb) | 75 min | Langfuse prompt management, evaluation datasets, LLM-as-Judge, CI/CD |
 
 ---
 
-### **01-advanced-prompt-engineering.ipynb** (60 min)
-
-Advanced prompt engineering techniques beyond the basics, covering reasoning enhancement, iterative refinement, efficiency optimizations, and systematic prompt improvement workflows.
-
-**What you'll learn**:
-- Chain-of-Thought (CoT) and Extended Thinking for reasoning tasks
-- Self-Refine (generate/critique/refine) and Chain-of-Verification for quality-critical output
-- Chain-of-Draft for production-efficient reasoning (50-70% token reduction)
-- Verbalized Sampling for diverse output generation
-- Prompt optimization workflows: manual iteration, LLM-assisted exploration, automated evaluation, Bedrock OptimizePrompt API
-
----
-
-### **02-advanced-prompt-caching.ipynb** (60 min)
+### **01-advanced-prompt-caching.ipynb** (60 min)
 
 Multi-checkpoint caching patterns and best practices for Amazon Bedrock, including cache invalidation, TTL strategies, and performance monitoring.
 
@@ -63,7 +47,7 @@ Multi-checkpoint caching patterns and best practices for Amazon Bedrock, includi
 
 ---
 
-### **03-production-prompt-lifecycle.ipynb** (75 min)
+### **02-production-prompt-lifecycle.ipynb** (75 min)
 
 End-to-end production prompt lifecycle management using Langfuse for versioning, systematic evaluation with datasets, automated quality scoring with LLM-as-Judge, and CI/CD integration with AWS CodePipeline.
 
@@ -82,11 +66,10 @@ End-to-end production prompt lifecycle management using Langfuse for versioning,
 ## Files Structure
 
 ```
-03-advanced-concepts/
+04-deep-dive-topics/
 ├── README.md
-├── 01-advanced-prompt-engineering.ipynb
-├── 02-advanced-prompt-caching.ipynb
-├── 03-production-prompt-lifecycle.ipynb
+├── 01-advanced-prompt-caching.ipynb
+├── 02-production-prompt-lifecycle.ipynb
 ├── scripts/                          # CI/CD pipeline scripts
 │   ├── evaluate_prompt.py            # Evaluation runner (Langfuse + Bedrock)
 │   └── check_quality_gate.py         # Quality gate checker (no dependencies)
