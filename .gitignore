@@ -63,3 +63,8 @@ uv.lock
 .ruff_cache/
 
 .claude/
+
+# draw.io diagram sources / backups (working files, not workshop content)
+prompt_opt_images.drawio
+.$*.drawio.bkp
+*.drawio.bkp
