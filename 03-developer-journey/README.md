@@ -10,7 +10,7 @@ Build a production customer support agent for **TechMart Electronics** while app
 - Technical troubleshooting via Knowledge Base
 - Web search for current information
 
-**Duration**: ~3 hours
+**Duration**: ~2.5 hours
 
 ---
 

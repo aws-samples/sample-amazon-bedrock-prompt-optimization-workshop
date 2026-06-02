@@ -4,7 +4,7 @@
 
 Two standalone deep-dive topics that don't belong to the main Fundamentals → Playbook → Developer Journey progression — each self-contained: complex caching patterns and production prompt lifecycle management. (Advanced prompt-engineering techniques — CoT, Self-Refine, CoD, Verbalized Sampling — now live in the Optimization Playbook, Lever 05, alongside the managed Bedrock Advanced Prompt Optimization tool.)
 
-**Duration**: ~2.5 hours
+**Duration**: ~1 hour
 
 ---
 

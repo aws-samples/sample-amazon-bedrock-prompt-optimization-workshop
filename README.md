@@ -25,7 +25,7 @@ This workshop focuses on optimizing three key metrics for production GenAI appli
 Four progressive tracks. Work them in this order (the folder prefixes are clone artifacts, not the sequence):
 
 ### Part 1: Fundamentals — `01-fundamentals/`
-*Estimated time: 1.25 hours*
+*Estimated time: 1 hour*
 
 Get your tooling and vocabulary in place: notebooks, token economics, latency metrics, observability.
 
@@ -33,7 +33,7 @@ Get your tooling and vocabulary in place: notebooks, token economics, latency me
 |-------|----------|-------------|
 | [Jupyter Notebook 101](./01-fundamentals/00-jupyter-notebook-101.ipynb) | 15 min | Kernels, cells, shortcuts, first Bedrock call |
 | [Prompts 101](./01-fundamentals/01-prompts-101.ipynb) | 30 min | Tokens, pricing, TPM/RPM, CRIS, Converse API, Bedrock Mantle |
-| [Langfuse Observability](./01-fundamentals/02-langfuse-observability.ipynb) | 30 min | LLM tracing, cost tracking, prompt management with Langfuse |
+| [Langfuse Observability](./01-fundamentals/02-langfuse-observability.ipynb) | 15 min | LLM tracing, cost tracking, prompt management with Langfuse |
 
 ### Part 2: Optimization Playbook — `02-optimization-playbook/`
 *Estimated time: ~2 hours*
@@ -47,7 +47,7 @@ The sixteen cost-and-latency levers, organized into three effort tiers. One cons
 | [HIGH effort](./02-optimization-playbook/03-high-effort.ipynb) | 60 min | Sub-agent delegation (Claude Agent SDK), tool search via MCP Gateway (+ concept: harness engineering, GEPA/DSPy) |
 
 ### Part 3: Developer Journey — `03-developer-journey/`
-*Estimated time: 3.5 hours*
+*Estimated time: 2.5 hours*
 
 Apply the levers to one production-ready TechMart Electronics customer support agent through 7 progressive labs, each improving the last.
 
@@ -64,7 +64,7 @@ Apply the levers to one production-ready TechMart Electronics customer support a
 > **Note**: Part 3 requires infrastructure deployment. See [03-developer-journey/README.md](./03-developer-journey/README.md) for setup instructions.
 
 ### Part 4: Deep Dives — `04-deep-dive-topics/`
-*Estimated time: 2.25 hours*
+*Estimated time: 1 hour*
 
 Two standalone deep-dive topics: deep-dive caching patterns, and the production prompt lifecycle (versioned, eval-gated, CI/CD-managed prompts).
 
