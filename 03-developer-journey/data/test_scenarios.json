@@ -40,7 +40,7 @@
     "expected_tool": "get_technical_support",
     "category": "complex",
     "is_rag": true,
-    "reference": "Acknowledge that not getting a new laptop online is frustrating and reassure the customer. Give a single first step rather than a full checklist: toggle airplane mode on and then back off, then try reconnecting to the network. Ask the customer to report whether that step worked before moving on."
+    "reference": "Acknowledge that not getting a new laptop online is frustrating and reassure the customer. Give a single first step rather than a full checklist: restart both the router and the laptop, then try reconnecting to the network. Ask the customer to report whether that worked before moving on to checking the Wi-Fi password, updating network drivers, or resetting network settings."
   },
   {
     "id": "tech-support-battery",
