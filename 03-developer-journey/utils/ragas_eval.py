@@ -243,8 +243,6 @@ def score_context_precision(query: str, reference: str, retrieved_contexts: list
 # metrics. Verified live (2026-06-02): v6 traces carry a TOOL observation per call
 # plus toolUse / toolResult blocks. See docs/adr/0002.
 
-_GATEWAY_TOOL_PREFIX = "customer-support-tools___"
-
 
 def normalize_trace_tool_names(raw_names: list[str]) -> list[str]:
     """Map trace tool names onto the bare names the scenarios are labeled with.
